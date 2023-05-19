@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-consumer
+spec:
+  volumes:
+  - name: storage
+    hostPath:
+      path: /mnt/minikube
+      type: Directory
+  containers:
+  - name: kafka-consumer
+    image: docker.io/bitnami/kafka:3.4.0-debian-11-r28
+    command:
+      - kafka-console-consumer.sh
+      - --topic
+      - demo-topic
+      - --bootstrap-server
+      ## Instruct your client to connect to the ockam sidecar
+      - localhost:9092
+  - name: sidecar
+    image: ghcr.io/build-trust/ockam:0.87.0
+    args:
+      - node
+      - create
+      - consumer-interceptor
+      - --bootstrap-server 127.0.0.1:9092
+      ## NOTE: port range is not supported by k8s
+      ## Port range (number of brokers) needs to ne known in advance here
+      - --brokers-port-range 9092-9102
+      ## Configure to get project information from the config file
+      - --project-config /mnt/storage/project.json
+      ## TODO: how do we enroll identities?
+    volumeMounts:
+      ## Provision project info json file via volume mount
+      - name: storage
+        mountPath: /mnt/storage
+        readOnly: false
+
+
