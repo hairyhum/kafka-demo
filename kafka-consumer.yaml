@@ -20,7 +20,11 @@ spec:
       ## Instruct your client to connect to the ockam sidecar
       - localhost:9092
   - name: sidecar
-    image: ghcr.io/build-trust/ockam:0.87.0
+    ## For local-built images
+    image: ockam-kafka-sidecar:latest
+    imagePullPolicy: Never
+    ## For GHCR images
+    # image: ghcr.io/build-trust/ockam-kafka-sidecar:latest
     args:
       - node
       - create
@@ -28,10 +32,13 @@ spec:
       - --bootstrap-server 127.0.0.1:9092
       ## NOTE: port range is not supported by k8s
       ## Port range (number of brokers) needs to ne known in advance here
-      - --brokers-port-range 9092-9102
-      ## Configure to get project information from the config file
+      - --brokers-port-range 9092-9095
+      ## NOTE: Configure to get project information from the config file
       - --project-config /mnt/storage/project.json
-      ## TODO: how do we enroll identities?
+      ## NOTE: Assume we have enroll token
+      - --enroll-token /mnt/storage/consumer.token
+      - --outlet-host kafka_outlet
+      - --outlet-port 9092
     volumeMounts:
       ## Provision project info json file via volume mount
       - name: storage

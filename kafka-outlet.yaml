@@ -11,7 +11,11 @@ spec:
       type: Directory
   containers:
   - name: kafka-outlet
-    image: ghcr.io/build-trust/ockam-kafka-outlet:latest
+    ## For local built images
+    image: ockam_kafka_outlet:latest
+    imagePullPolicy: Never
+    ## For GHCR images
+    # image: ghcr.io/build-trust/ockam_kafka_outlet:latest
     env:
       - name: KAFKA_BOOTSTRAP_SERVER
         value: "kafka:9092"
@@ -27,8 +31,7 @@ spec:
   - name: ockam-sidecar
     image: ghcr.io/build-trust/ockam:0.87.0
     args: ["node", "create", "-vv", "-f", "--tcp-listener-address=127.0.0.1:4100",
-           "--launch-config={\"startup_services\":{\"identity\":{},\"vault\":{},\"verifier\":{}}}",
-           "sidecar"]
-      env:
-        - name: OCKAM_DISABLE_UPGRADE_CHECK
-          value: "1"
+           "--launch-config={\"startup_services\":{\"identity\":{},\"vault\":{},\"verifier\":{}}}", "sidecar"]
+    env:
+      - name: OCKAM_DISABLE_UPGRADE_CHECK
+        value: "1"
