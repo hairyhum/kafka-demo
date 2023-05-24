@@ -54,8 +54,7 @@ healthcheck_services = [
     {:echo,
            [
              address: "healthcheck",
-             log_level: :debug,
-             authorization: [{Ockam.Worker.Authorization, :from_identiy_secure_channel}]
+             log_level: :debug
            ]}]
 
 config :ockam_services,

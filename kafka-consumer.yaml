@@ -4,6 +4,7 @@ kind: Pod
 metadata:
   name: kafka-consumer
 spec:
+  restartPolicy: Never
   volumes:
   - name: storage
     hostPath:
@@ -25,20 +26,17 @@ spec:
     imagePullPolicy: Never
     ## For GHCR images
     # image: ghcr.io/build-trust/ockam-kafka-sidecar:latest
-    args:
-      - node
-      - create
-      - consumer-interceptor
-      - --bootstrap-server 127.0.0.1:9092
-      ## NOTE: port range is not supported by k8s
-      ## Port range (number of brokers) needs to ne known in advance here
-      - --brokers-port-range 9092-9095
-      ## NOTE: Configure to get project information from the config file
-      - --project-config /mnt/storage/project.json
-      ## NOTE: Assume we have enroll token
-      - --enroll-token /mnt/storage/consumer.token
-      - --outlet-host kafka_outlet
-      - --outlet-port 9092
+    env:
+    - name: ROLE
+      value: consumer
+    - name: BOOTSTRAP_SERVER
+      value: 127.0.0.1:9092
+    - name: OUTLET_HOST
+      value: kafka-outlet
+    - name: OUTLET_PORT
+      value: "6000"
+    - name: ENROLL_TOKEN
+      value: /mnt/storage/consumer.token
     volumeMounts:
       ## Provision project info json file via volume mount
       - name: storage

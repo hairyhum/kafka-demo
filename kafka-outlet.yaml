@@ -3,6 +3,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: kafka-outlet
+  labels:
+    app.kubernetes.io/name: kafka-outlet
 spec:
   volumes:
   - name: storage
@@ -23,6 +25,12 @@ spec:
         value: "false"
       - name: PROJECT_CONFIG
         value: /mnt/storage/project.json
+      - name: TCP_PORT
+        value: "6000"
+    ports:
+    - containerPort: 6000
+      name: ockam
+      protocol: TCP
     volumeMounts:
       ## Provision project info json file via volume mount
       - name: storage
@@ -35,3 +43,18 @@ spec:
     env:
       - name: OCKAM_DISABLE_UPGRADE_CHECK
         value: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-outlet
+spec:
+  selector:
+    app.kubernetes.io/name: kafka-outlet
+  ports:
+    - name: ockam
+      protocol: TCP
+      port: 6000
+      targetPort: ockam
+
+

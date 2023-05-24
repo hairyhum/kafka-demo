@@ -29,6 +29,9 @@ This will create a `default` project which can be used in the demo
 
 2. Get the project information into `mnt/project.json`
 
+**This is needed temporarily to configure kafka-outlet**
+**FIXME: remove this step when switching to rust outlet and to credential for the outlet**
+
 ```
 ockam project information default --output=json > mnt/project.json
 ```
@@ -37,12 +40,12 @@ This project information will be used by provisioned ockam nodes
 
 3. Create enrollment tokens for components to authenticate with the project
 
+**FIXME: add token for the outlet**
 ```
 ockam project enroll --attribute role=member > mnt/consumer.token
 ockam project enroll --attribute role=member > mnt/producer.token
 ```
 
-**NOTE:** we might want to enroll the outlet node as well
 **QUESTION:** do we have control over expiration of the token?
 
 4. Start the minikube cluster with `mnt` directory mounted
@@ -66,6 +69,8 @@ helm install kafka oci://registry-1.docker.io/bitnamicharts/kafka
 We assume default configuration of the helm release resources in the demo configs:
 - service `kafka` with port 9092
 - three kafka brokers
+
+**NOTE: before next steps you need to build the images if you're using locally built images**
 
 6. Start `kafka-outlet` pod
 
@@ -133,17 +138,41 @@ docker build build -t ockam_kafka_outlet:latest .
 - Currently using elixir app for `kafka-outlet`, it will validate credentials but will not present its own credentials to the interceptor sidecars.
 - We have to use ockam nodes as sidecars because current implementation assumes localhost for dynamic inlets, we could change that with some configuration
 
-### TODO
 
-We need to make a docker image which will start a rust kafka sidecar with a single command.
+## Issues
 
-- It needs to read `project.json`
-- It needs to enroll using enrollment token (if not enrolled yet)
-- It needs connect to the configured outlet instead of the project node
-
-Optional:
-- We might also set up the sidecars to establish encryption secure channel over kafka-outlet.
+Node is not presenting credentials when --project-route is not a project. Disabled credential check for now in the outlet app.
+There is no API to check that identity is already enrolled, I'm using `node list` to check the node existence.
+Since tokens are 1-use only, we need to re-create them when we re-deploy consumer or producer.
 
 
+## Building images
 
+This setup need outlet image and kafka interceptor image.
+
+They need to be built for minikube as following:
+
+#### For outlet image:
+```
+cd ./ockam_kafka_outlet
+eval $(minikube docker-env)
+docker build -t ockam_kafka_outlet:latest .
+```
+
+#### For kafka interceptor:
+
+**IMPORTANT You need to have `ockam` binary in your `ockam_sidecar` directory**
+
+First you need to build `ockam` binary for your architecture, currently there is one
+pre-built for `aarch64-unknown-linux-gnu`
+
+Then you need to put this binary named `ockam` into `ockam_sidecar` directory.
+
+For minikube running on arm64 mac, you can copy `ockam-aarch64-unknown-linux-gnu`
+
+```
+cd ./ockam_sidecar
+eval $(minikube docker-env)
+docker build -t ockam-kafka-sidecar:latest .
+```
 

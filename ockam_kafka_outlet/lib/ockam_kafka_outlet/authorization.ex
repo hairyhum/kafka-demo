@@ -4,10 +4,12 @@ defmodule OckamKafkaOutlet.Authorization do
   alias Ockam.ABAC.Policy
 
   def local_or_from_member(message, state) do
-    {:ok, allow_local_policy} = allow_local_policy()
-    {:ok, member_policy} = member_policy()
-    ## TODO: we could make it an `or` rule, it's the same thing as providing a list of policies
-    Authorization.with_policy_check(message, state, [allow_local_policy, member_policy])
+    :ok
+    ## FIXME: re-enable auth
+    # {:ok, allow_local_policy} = allow_local_policy()
+    # {:ok, member_policy} = member_policy()
+    # ## TODO: we could make it an `or` rule, it's the same thing as providing a list of policies
+    # Authorization.with_policy_check(message, state, [allow_local_policy, member_policy])
   end
 
   def project_policy_rule(project_id) do
