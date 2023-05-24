@@ -4,7 +4,6 @@ kind: Pod
 metadata:
   name: kafka-producer
 spec:
-  restartPolicy: Never
   volumes:
   - name: storage
     hostPath:
