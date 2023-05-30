@@ -36,6 +36,12 @@ spec:
       value: "6000"
     - name: ENROLL_TOKEN
       value: /mnt/storage/consumer.token
+    - name: OCKAM_CONTROLLER_IDENTITY_ID
+      value: "Pd14c9e0a57cd41382c69092987cc7ce912a8f7ec7de26cd44115a42561b1a4de"
+    - name: OCKAM_HOME
+      value: "/mnt/storage/ockam_home/consumer"
+    - name: OCKAM_DISABLE_UPGRADE_CHECK
+      value: "1"
     volumeMounts:
       ## Provision project info json file via volume mount
       - name: storage
