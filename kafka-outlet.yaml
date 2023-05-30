@@ -12,21 +12,27 @@ spec:
       path: /mnt/minikube
       type: Directory
   containers:
-  - name: kafka-outlet
-    ## For local built images
-    image: ockam_kafka_outlet:latest
+  - name: sidecar
+    ## For local-built images
+    image: ockam-kafka-sidecar:latest
     imagePullPolicy: Never
     ## For GHCR images
-    # image: ghcr.io/build-trust/ockam_kafka_outlet:latest
+    # image: ghcr.io/build-trust/ockam-kafka-sidecar:latest
     env:
-      - name: KAFKA_BOOTSTRAP_SERVER
-        value: "kafka:9092"
-      - name: KAFKA_USE_SSL
-        value: "false"
-      - name: PROJECT_CONFIG
-        value: /mnt/storage/project.json
-      - name: TCP_PORT
-        value: "6000"
+    - name: ROLE
+      value: outlet
+    - name: OUTLET_PORT
+      value: "6000"
+    - name: BOOTSTRAP_SERVER
+      value: kafka:9092
+    - name: ENROLL_TOKEN
+      value: /mnt/storage/outlet.token
+    - name: OCKAM_CONTROLLER_IDENTITY_ID
+      value: "Pd14c9e0a57cd41382c69092987cc7ce912a8f7ec7de26cd44115a42561b1a4de"
+    - name: OCKAM_HOME
+      value: "/mnt/storage/ockam_home/outlet"
+    - name: OCKAM_DISABLE_UPGRADE_CHECK
+      value: "1"
     ports:
     - containerPort: 6000
       name: ockam
@@ -36,13 +42,6 @@ spec:
       - name: storage
         mountPath: /mnt/storage
         readOnly: false
-  - name: ockam-sidecar
-    image: ghcr.io/build-trust/ockam:0.87.0
-    args: ["node", "create", "-vv", "-f", "--tcp-listener-address=127.0.0.1:4100",
-           "--launch-config={\"startup_services\":{\"identity\":{},\"vault\":{},\"verifier\":{}}}", "sidecar"]
-    env:
-      - name: OCKAM_DISABLE_UPGRADE_CHECK
-        value: "1"
 ---
 apiVersion: v1
 kind: Service
@@ -56,5 +55,3 @@ spec:
       protocol: TCP
       port: 6000
       targetPort: ockam
-
-
